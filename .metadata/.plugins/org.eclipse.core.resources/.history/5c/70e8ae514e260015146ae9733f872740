@@ -1,0 +1,42 @@
+package latex;
+
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
+import org.apache.uima.jcas.JCas;
+
+public class LatexAnnotator extends JCasAnnotator_ImplBase {
+	
+	private Pattern number = Pattern.compile("[0-9]+");
+	private Pattern func = Pattern.compile("\\[A-Za-z]+");
+	
+	public void process (JCas aJCas) {
+		// get document text
+	    String docText = aJCas.getDocumentText();
+	    StringTokenizer token = new StringTokenizer(docText, " \t\n\r{}=,|.-+*()^/[]<>&:;");
+	    while (token.hasMoreTokens()) {
+	    	//search
+	    	Matcher matcher = number.matcher(token.nextToken());
+	    	while (matcher.find()) {
+	  	      // found one - create annotation
+	  	      number annotation = new number(aJCas);
+	  	      annotation.setBegin(matcher.start());
+	  	      annotation.setEnd(matcher.end());
+	  	      annotation.addToIndexes();
+	    	}
+	    	// search 
+		    matcher = func.matcher(token.nextToken());
+		    while (matcher.find()) {
+		      // found one - create annotation
+		      func annotation = new func(aJCas);
+		      annotation.setBegin(matcher.start());
+		      annotation.setEnd(matcher.end());
+		      annotation.addToIndexes();
+		    }
+	    	
+	    }
+	    
+	}
+} 

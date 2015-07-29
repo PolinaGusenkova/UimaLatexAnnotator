@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
+  <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
+  <primitive>true</primitive>
+  <annotatorImplementationName>latex.LatexAnnotator.java</annotatorImplementationName>
+  <analysisEngineMetaData>
+    <name>LatexAnnotator</name>
+    <description/>
+    <configurationParameters>
+       
+       <configurationParameter>
+          <name>DictionaryFiles</name>
+          <description>list of dictionary files to configure the annotator</description>
+          <type>String</type>
+          <multiValued>true</multiValued>
+          <mandatory>true</mandatory>
+       </configurationParameter>
+
+       <configurationParameter>
+          <name>InputMatchType</name>
+          <description/>
+          <type>String</type>
+          <multiValued>false</multiValued>
+          <mandatory>true</mandatory>
+       </configurationParameter>
+
+       <configurationParameter>
+          <name>InputMatchFeaturePath</name>
+          <description/>
+          <type>String</type>
+          <multiValued>false</multiValued>
+          <mandatory>false</mandatory>
+       </configurationParameter>
+
+       <configurationParameter>
+          <name>InputMatchFilterFeaturePath</name>
+          <description/>
+          <type>String</type>
+          <multiValued>false</multiValued>
+          <mandatory>false</mandatory>
+       </configurationParameter>
+
+       <configurationParameter>
+          <name>FilterConditionOperator</name>
+          <description/>
+          <type>String</type>
+          <multiValued>false</multiValued>
+          <mandatory>false</mandatory>
+       </configurationParameter>
+
+       <configurationParameter>
+          <name>FilterConditionValue</name>
+          <description/>
+          <type>String</type>
+          <multiValued>false</multiValued>
+          <mandatory>false</mandatory>
+       </configurationParameter>
+	
+    </configurationParameters>
+    
+    <configurationParameterSettings>
+    
+       <nameValuePair>
+          <name>DictionaryFiles</name>
+          <value>
+          	<array>
+          	   <string>dictionary.xml</string> 
+          	</array>
+          </value>
+       </nameValuePair>      
+
+       <nameValuePair>
+          <name>InputMatchType</name>
+          <value>
+          	   <string>org.apache.uima.TokenAnnotation</string> 
+          </value>
+       </nameValuePair>      
+     
+    </configurationParameterSettings>
+    <typeSystemDescription>
+      <types>
+        <typeDescription>
+          <name>latex.LetterVariable</name>
+          <description/>
+          <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+      </types>
+    </typeSystemDescription>
+    <capabilities>
+      <capability>
+        <inputs/>
+        <outputs/>
+        <languagesSupported/>
+      </capability>
+    </capabilities>
+    <operationalProperties>
+      <modifiesCas>true</modifiesCas>
+      <multipleDeploymentAllowed>true</multipleDeploymentAllowed>
+      <outputsNewCASes>false</outputsNewCASes>
+    </operationalProperties>
+  </analysisEngineMetaData>
+   
+</analysisEngineDescription>
