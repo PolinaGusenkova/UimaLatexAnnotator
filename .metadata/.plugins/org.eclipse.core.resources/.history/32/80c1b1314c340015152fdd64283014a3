@@ -1,0 +1,279 @@
+package latex;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
+import org.apache.uima.jcas.JCas;
+
+public class LatexAnnotator extends JCasAnnotator_ImplBase {
+	
+	private Object[] getExpression (String docText, int index) {
+		Object[] exprInd = new Object[2];
+		int i = index;
+		String expression = "{";
+		int braceIsOpen = 1;
+		for (i = i+1; i < docText.length() && braceIsOpen != 0; i++ ) {
+			expression += docText.charAt(i);
+			if (docText.charAt(i) == '{') {
+				braceIsOpen++;
+			} else if (docText.charAt(i) == '}') {
+				braceIsOpen--;
+			}
+		}
+		exprInd[0] = expression;
+		exprInd[1] = i;
+		return exprInd;
+	}
+	
+	private void getIndex (String docText, int end, String[] indexUpLow) {
+		Object[] exprInd = new Object[2];
+		int index = end;
+		for (int i = 0; i < 2; i++) {
+			if (index < docText.length() && docText.charAt(index) == '^') {
+				index++;
+				if ( Character.isDigit(docText.charAt(index)) || Character.isLetter(docText.charAt(index)) ) {
+					indexUpLow[0] += docText.charAt(index);
+					index++;
+				} else {
+					exprInd = getExpression(docText, index);
+					indexUpLow[0] = (String)exprInd[0];
+					index = (int)exprInd[1];
+				}
+			} else if (index < docText.length() && docText.charAt(index) == '_') {
+				index++;
+				if ( Character.isDigit(docText.charAt(index)) || Character.isLetter(docText.charAt(index)) ) {
+					indexUpLow[1] += docText.charAt(index);
+					index++;
+				} else {
+					exprInd = getExpression(docText, index);
+					indexUpLow[1] = (String)exprInd[0];
+					index = (int)exprInd[1];
+				}
+			}
+		}
+	}
+	
+/*	private String getFuncParameter (String docText, int end) {
+		int index = end;
+		String[] indexUpLow = new String [2];
+		indexUpLow[0] = "";
+		indexUpLow[1] = "";
+		String param = "";
+		
+		while
+		if (docText.charAt(index) == '{') {
+			param = (String)getExpression(docText, index)[0];
+		} else {
+			param = getFuncSequence(docText, index);
+		}
+		
+		if ( Character.isDigit(docText.charAt(index)) || Character.isLetter(docText.charAt(index)) ) {
+			param += docText.charAt(index);
+			index++;
+			getIndex(docText, index, indexUpLow);
+			if (! "".equals(indexUpLow[0])) {
+				param += '^' + indexUpLow[0];
+				
+			}
+			if (! "".equals(indexUpLow[1])) {
+				param += '_' + indexUpLow[1];
+				
+			}
+		} else {
+			if (docText.charAt(index) == '\\') {
+				param = getFuncSequence(docText, index);
+			} else {
+				param = (String)getExpression(docText, index)[0];
+			}
+		} 
+		return param;
+	} */
+	
+	private String getFuncParameter(String docText, int index) {
+		String[] indexUpLow = new String [2];
+		indexUpLow[0] = "";
+		indexUpLow[1] = "";
+		Object[] exprInd = new Object [2];
+		Matcher matcher;
+		int i = index;
+		boolean argFound = false;
+		StringBuilder word = new StringBuilder();
+		StringBuilder result = new StringBuilder();
+		while (! argFound) {
+			for (; docText.charAt(i) == ' '; i++) {
+				result.append(' ');
+			}
+			if (docText.charAt(i) == '\\') {
+				word.setLength(0);
+				word.append('\\');
+				i++;
+				while (Character.isLetter(docText.charAt(i)) ) {
+					word.append(docText.charAt(i));
+					i++;
+				}
+				matcher = greek.matcher(word);
+				if (matcher.matches()) {
+					argFound = true;
+				}
+				result.append(word);
+			} else 
+				if (docText.charAt(i) == '{') {
+					exprInd = getExpression(docText, i);
+					result.append(exprInd[0]);
+					i = (int)exprInd[1];
+					argFound = true;
+				} else {
+					result.append(docText.charAt(i));
+					i++;
+					getIndex(docText, i, indexUpLow);
+					if (! "".equals(indexUpLow[0])) {
+						result.append('^' + indexUpLow[0]);
+					}
+					if (! "".equals(indexUpLow[1])) {
+						result.append('_' + indexUpLow[1]);
+					}
+					argFound = true;
+				}
+					
+		}
+		return result.toString();
+	}
+
+	private Pattern func = Pattern.compile("\\\\(arccos|arcsin|arctan|arg|cos|cosh|cot|coth|csc|sec|sin|sinh|tan|tanh|sqrt)");
+	private Pattern otherFunc = Pattern.compile("\\\\(deg|det|dim|exp|gcd|hom|inf|ker|lg|ln|Pr|lim|liminf|limsup|log|max|min|sup|sum|prod|coprod|int|iint|iiint|oint|oiint|oiiint|over|frac)");
+	private Pattern greek = Pattern.compile("\\\\(alpha|theta|tau|bet|vartheta|pi|upsilon|gamma|varpi|phi|delta|kappa|rho|varphi|epsilon|lambda|varrho|chi|varepsilon|mu|sigma|psi|zeta|nu|varsigma|omega|eta|xi|Gamma|Lambda|Sigma|Psi|Delta|Xi|Upsilon|Omega|Theta|Pi|Phi)");
+	private Pattern accentVar = Pattern.compile("\\\\(vec|bar|breve|tilde|check|hat|dot|ddot)\\s*?([A-Za-z]|\\{[A-Za-z]\\})");
+	private Pattern other = Pattern.compile("\\\\[A-Za-z]+");
+	private Pattern letterVar = Pattern.compile("[A-Za-z]");
+	
+	public void process (JCas aJCas) {
+		// get document text
+	    String docText = aJCas.getDocumentText();
+	    boolean[] annotated = new boolean[docText.length()];
+	    int start, end;
+	    String[] indexUpLow = new String[2];
+	
+	     // search
+	    Matcher matcher = func.matcher(docText);
+		while (matcher.find()) { 
+			start = matcher.start();
+			end = matcher.end();		
+			 // remember annotated symbols
+			for (int i = start; i < end; i++) {
+				annotated[i] = true;
+			}
+			 // create annotation
+			Func annotation = new Func(aJCas);
+		    annotation.setBegin(start);
+		    annotation.setEnd(end);
+		    annotation.setName(matcher.group());
+		    annotation.setExpression( getFuncParameter(docText, end) );
+		    annotation.addToIndexes();
+		} 
+		
+		  // search
+	    matcher = otherFunc.matcher(docText);
+		while (matcher.find()) { 
+			start = matcher.start();
+			end = matcher.end();		
+			 // remember annotated symbols
+			for (int i = start; i < end; i++) {
+				annotated[i] = true;
+			}
+			 // create annotation
+			Other annotation = new Other(aJCas);
+		    annotation.setBegin(start);
+		    annotation.setEnd(end);
+		    annotation.setName(matcher.group());
+		   // annotation.setExpression( getFuncParameter(docText, end) );
+		    annotation.addToIndexes();
+		} 
+		
+		 // search
+	    matcher = greek.matcher(docText);
+		while (matcher.find()) {
+			start = matcher.start();
+			end = matcher.end();		
+			 // remember annotated symbols
+			for (int i = start; i < end; i++) {
+				annotated[i] = true;
+			}
+			 // create annotation
+			Greek annotation = new Greek(aJCas);
+		    annotation.setBegin(start);
+		    annotation.setEnd(end);
+		    annotation.setName(matcher.group());
+		    
+		    if (start != 0 && docText.charAt(start-1) != '_' && docText.charAt(start-1) != '^') {
+			    indexUpLow[0] = "";
+			    indexUpLow[1] = "";
+			    getIndex(docText, end, indexUpLow);
+			    if (! "".equals(indexUpLow[0])) {
+			    	annotation.setUpperIndex(indexUpLow[0]);
+			    }
+			    if (! "".equals(indexUpLow[1])) {
+			    	annotation.setLowerIndex(indexUpLow[1]);
+			    }
+		    }
+		    annotation.addToIndexes();
+		} 
+		
+		 // search
+	    matcher = accentVar.matcher(docText);
+		while (matcher.find()) { 
+			start = matcher.start();
+			end = matcher.end();		
+			 // remember annotated symbols
+			for (int i = start; i < end; i++) {
+				annotated[i] = true;
+			}
+			 // create annotation
+			AccentVar annotation = new AccentVar(aJCas);
+		    annotation.setBegin(start);
+		    annotation.setEnd(end);
+		    annotation.setName(matcher.group());
+		    
+		    if (start != 0 && docText.charAt(start-1) != '_' && docText.charAt(start-1) != '^') {
+			    indexUpLow[0] = "";
+			    indexUpLow[1] = "";
+			    getIndex(docText, end, indexUpLow);
+			    if (! "".equals(indexUpLow[0])) {
+			    	annotation.setUpperIndex(indexUpLow[0]);
+			    }
+			    if (! "".equals(indexUpLow[1])) {
+			    	annotation.setLowerIndex(indexUpLow[1]);
+			    }
+		    }
+		    annotation.addToIndexes();
+		}
+		
+		 // search
+	    matcher = letterVar.matcher(docText);
+		while (matcher.find()) {
+			start = matcher.start();
+			end = matcher.end();
+			if (annotated[start] == false) {
+				 // create annotation
+				LetterVar annotation = new LetterVar(aJCas);
+			    annotation.setBegin(start);
+			    annotation.setEnd(end);
+			    annotation.setName(matcher.group());
+			    
+			    if (start != 0 && docText.charAt(start-1) != '_' && docText.charAt(start-1) != '^') {
+				    indexUpLow[0] = "";
+				    indexUpLow[1] = "";
+				    getIndex(docText, end, indexUpLow);
+				    if (! "".equals(indexUpLow[0])) {
+				    	annotation.setUpperIndex(indexUpLow[0]);
+				    }
+				    if (! "".equals(indexUpLow[1])) {
+				    	annotation.setLowerIndex(indexUpLow[1]);
+				    }
+			    }
+			    annotation.addToIndexes();
+			}
+		} 
+	    
+	}
+} 

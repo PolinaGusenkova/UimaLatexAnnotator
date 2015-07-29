@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/uimaj-examples"/>
+	<classpathentry kind="var" path="UIMA_HOME"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/jackson-core-2.4.2.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/jVinci.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-adapter-soap.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-adapter-vinci.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-core.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-cpe.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-document-annotation.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-examples.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uimaj-bootstrap.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uimaj-json.jar"/>
+	<classpathentry kind="lib" path="D:/uima/uimaj-2.7.0-bin/apache-uima/lib/uima-tools.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
